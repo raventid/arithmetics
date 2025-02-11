@@ -1,0 +1,9 @@
+[package]
+name = "arithmetics"
+version = "0.1.0"
+edition = "2021"
+authors = ["raventid"]
+description = "Comprehensive comparison and benchmarking of Rust arithmetic libraries"
+license = "MIT"
+
+[dependencies]
