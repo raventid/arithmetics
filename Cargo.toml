@@ -7,3 +7,12 @@ description = "Comprehensive comparison and benchmarking of Rust arithmetic libr
 license = "MIT"
 
 [dependencies]
+rust_decimal = "1.33"
+bigdecimal = "0.4"
+
+[[bench]]
+name = "arithmetic_comparison"
+harness = false
+
+[dev-dependencies]
+criterion = "0.5"
