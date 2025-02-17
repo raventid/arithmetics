@@ -9,6 +9,7 @@ license = "MIT"
 [dependencies]
 rust_decimal = "1.33"
 bigdecimal = "0.4"
+decimal = "2.1"
 
 [[bench]]
 name = "arithmetic_comparison"
