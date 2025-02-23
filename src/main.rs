@@ -2,6 +2,9 @@ use rust_decimal::Decimal;
 use bigdecimal::BigDecimal;
 use std::str::FromStr;
 
+mod precision;
+use precision::PrecisionAnalyzer;
+
 fn main() {
     println!("Arithmetic Libraries Comparison Project");
     println!("======================================");
@@ -25,4 +28,10 @@ fn main() {
     let big_a = BigDecimal::from_str(num1_str).unwrap();
     let big_b = BigDecimal::from_str(num2_str).unwrap();
     println!("bigdecimal:   {} + {} = {}", big_a, big_b, &big_a + &big_b);
+    
+    println!();
+    
+    // Run precision analysis
+    PrecisionAnalyzer::analyze_accumulation_error();
+    PrecisionAnalyzer::analyze_small_number_precision();
 }
