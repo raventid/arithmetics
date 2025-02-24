@@ -10,6 +10,8 @@ license = "MIT"
 rust_decimal = "1.33"
 bigdecimal = "0.4"
 decimal = "2.1"
+fixed = "1.24"
+half = "2.3"
 
 [[bench]]
 name = "arithmetic_comparison"
