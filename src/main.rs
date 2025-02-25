@@ -3,7 +3,7 @@ use bigdecimal::BigDecimal;
 use std::str::FromStr;
 
 mod precision;
-use precision::PrecisionAnalyzer;
+use precision::{PrecisionAnalyzer, memory::MemoryAnalyzer};
 
 fn main() {
     println!("Arithmetic Libraries Comparison Project");
@@ -34,4 +34,8 @@ fn main() {
     // Run precision analysis
     PrecisionAnalyzer::analyze_accumulation_error();
     PrecisionAnalyzer::analyze_small_number_precision();
+    
+    // Run memory analysis
+    MemoryAnalyzer::analyze_memory_footprint();
+    MemoryAnalyzer::analyze_allocation_patterns();
 }

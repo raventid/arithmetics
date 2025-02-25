@@ -1,5 +1,7 @@
 //! Precision analysis module for comparing arithmetic accuracy
 
+pub mod memory;
+
 /// Precision analysis struct for testing arithmetic accuracy
 pub struct PrecisionAnalyzer;
 
