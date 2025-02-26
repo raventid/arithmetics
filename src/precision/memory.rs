@@ -52,4 +52,23 @@ impl MemoryAnalyzer {
         println!("  • Use Decimal for financial calculations");
         println!("  • Use BigDecimal only when arbitrary precision is required");
     }
+    
+    /// Analyze decimal128 memory footprint specifically
+    pub fn analyze_decimal128_memory() {
+        println!("\n🧠 Memory Analysis: Decimal128 Deep Dive");
+        println!("======================================");
+        
+        println!("D128 detailed analysis:");
+        println!("  Size: {} bytes", mem::size_of::<d128>());
+        println!("  Alignment: {} bytes", mem::align_of::<d128>());
+        
+        // Compare with IEEE 754 binary formats
+        println!("\nIEEE 754 comparison:");
+        println!("  f32 (binary32):  {} bytes", mem::size_of::<f32>());
+        println!("  f64 (binary64):  {} bytes", mem::size_of::<f64>());
+        println!("  d128 (decimal128): {} bytes", mem::size_of::<d128>());
+        
+        println!("\n📊 Analysis: D128 uses {} bytes, providing 34 decimal digits of precision", 
+                 mem::size_of::<d128>());
+    }
 }
