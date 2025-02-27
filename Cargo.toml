@@ -17,5 +17,9 @@ half = "2.3"
 name = "arithmetic_comparison"
 harness = false
 
+[[bench]]
+name = "complex_operations"
+harness = false
+
 [dev-dependencies]
 criterion = "0.5"
