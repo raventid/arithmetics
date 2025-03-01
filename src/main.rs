@@ -3,7 +3,9 @@ use bigdecimal::BigDecimal;
 use std::str::FromStr;
 
 mod precision;
+mod safety;
 use precision::{PrecisionAnalyzer, memory::MemoryAnalyzer};
+use safety::SafetyAnalyzer;
 
 fn main() {
     println!("Arithmetic Libraries Comparison Project");
@@ -38,4 +40,9 @@ fn main() {
     // Run memory analysis
     MemoryAnalyzer::analyze_memory_footprint();
     MemoryAnalyzer::analyze_allocation_patterns();
+    
+    // Run safety analysis
+    SafetyAnalyzer::test_overflow_detection();
+    SafetyAnalyzer::test_division_by_zero();
+    SafetyAnalyzer::test_precision_loss();
 }
