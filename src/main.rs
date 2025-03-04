@@ -4,12 +4,20 @@ use std::str::FromStr;
 
 mod precision;
 mod safety;
+mod validation;
 use precision::{PrecisionAnalyzer, memory::MemoryAnalyzer};
 use safety::SafetyAnalyzer;
+use validation::ValidationSuite;
 
 fn main() {
     println!("Arithmetic Libraries Comparison Project");
     println!("======================================");
+    println!();
+    
+    // Run validation tests first
+    println!("=== Running Validation Tests ===");
+    let validation_results = ValidationSuite::run_all_validations();
+    ValidationSuite::print_validation_summary(&validation_results);
     println!();
     
     // Example calculations with different libraries
