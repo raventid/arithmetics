@@ -5,9 +5,11 @@ use std::str::FromStr;
 mod precision;
 mod safety;
 mod validation;
+mod profiling;
 use precision::{PrecisionAnalyzer, memory::MemoryAnalyzer};
 use safety::SafetyAnalyzer;
 use validation::ValidationSuite;
+use profiling::PerformanceProfiler;
 
 fn main() {
     println!("Arithmetic Libraries Comparison Project");
@@ -53,4 +55,10 @@ fn main() {
     SafetyAnalyzer::test_overflow_detection();
     SafetyAnalyzer::test_division_by_zero();
     SafetyAnalyzer::test_precision_loss();
+    
+    // Run performance profiling
+    println!("\n=== Performance Profiling ===");
+    let performance_metrics = PerformanceProfiler::run_comprehensive_profiling();
+    PerformanceProfiler::print_performance_report(&performance_metrics);
+    PerformanceProfiler::benchmark_memory_allocation_speed();
 }
