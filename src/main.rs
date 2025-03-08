@@ -6,10 +6,12 @@ mod precision;
 mod safety;
 mod validation;
 mod profiling;
+mod error_analysis;
 use precision::{PrecisionAnalyzer, memory::MemoryAnalyzer};
 use safety::SafetyAnalyzer;
 use validation::ValidationSuite;
 use profiling::PerformanceProfiler;
+use error_analysis::AdvancedErrorAnalyzer;
 
 fn main() {
     println!("Arithmetic Libraries Comparison Project");
@@ -61,4 +63,12 @@ fn main() {
     let performance_metrics = PerformanceProfiler::run_comprehensive_profiling();
     PerformanceProfiler::print_performance_report(&performance_metrics);
     PerformanceProfiler::benchmark_memory_allocation_speed();
+    
+    // Run advanced error analysis
+    println!("\n=== Advanced Error Analysis ===");
+    let error_analyses = AdvancedErrorAnalyzer::analyze_floating_point_errors();
+    AdvancedErrorAnalyzer::print_error_analysis(&error_analyses);
+    
+    let accumulation_errors = AdvancedErrorAnalyzer::analyze_accumulation_errors();
+    AdvancedErrorAnalyzer::print_accumulation_analysis(&accumulation_errors);
 }
