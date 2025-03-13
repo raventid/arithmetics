@@ -7,13 +7,26 @@ mod safety;
 mod validation;
 mod profiling;
 mod error_analysis;
+mod config;
 use precision::{PrecisionAnalyzer, memory::MemoryAnalyzer};
 use safety::SafetyAnalyzer;
 use validation::ValidationSuite;
 use profiling::PerformanceProfiler;
 use error_analysis::AdvancedErrorAnalyzer;
+use config::ArithmeticConfig;
 
 fn main() {
+    // Load configuration
+    let config = ArithmeticConfig::load_or_default("config.toml");
+    
+    // Validate configuration
+    if let Err(e) = config.validate() {
+        eprintln!("Configuration error: {}", e);
+        std::process::exit(1);
+    }
+    
+    config.print_summary();
+    
     println!("Arithmetic Libraries Comparison Project");
     println!("======================================");
     println!();
