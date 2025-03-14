@@ -8,14 +8,26 @@ mod validation;
 mod profiling;
 mod error_analysis;
 mod config;
+mod cli;
 use precision::{PrecisionAnalyzer, memory::MemoryAnalyzer};
 use safety::SafetyAnalyzer;
 use validation::ValidationSuite;
 use profiling::PerformanceProfiler;
 use error_analysis::AdvancedErrorAnalyzer;
 use config::ArithmeticConfig;
+use cli::CliHandler;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Handle CLI arguments first
+    if std::env::args().len() > 1 {
+        return CliHandler::handle_cli();
+    }
+    
+    // If no CLI args, run default behavior
+    run_default_analysis()
+}
+
+fn run_default_analysis() -> Result<(), Box<dyn std::error::Error>> {
     // Load configuration
     let config = ArithmeticConfig::load_or_default("config.toml");
     
@@ -84,4 +96,6 @@ fn main() {
     
     let accumulation_errors = AdvancedErrorAnalyzer::analyze_accumulation_errors();
     AdvancedErrorAnalyzer::print_accumulation_analysis(&accumulation_errors);
+    
+    Ok(())
 }
