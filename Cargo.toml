@@ -27,5 +27,21 @@ harness = false
 name = "complex_operations"
 harness = false
 
+[[bench]]
+name = "batch_operations"
+harness = false
+
+[[bench]]
+name = "fixed_point"
+harness = false
+
+[[bench]]
+name = "half_precision"
+harness = false
+
+[[bench]]
+name = "simd_operations"
+harness = false
+
 [dev-dependencies]
 criterion = "0.5"
