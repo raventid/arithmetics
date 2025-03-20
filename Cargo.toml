@@ -48,5 +48,9 @@ harness = false
 name = "multithreaded_operations"
 harness = false
 
+[[bench]]
+name = "real_world_applications"
+harness = false
+
 [dev-dependencies]
 criterion = "0.5"
