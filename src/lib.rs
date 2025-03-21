@@ -3,9 +3,10 @@ pub mod safety;
 pub mod validation;
 pub mod profiling;
 pub mod error_analysis;
-pub mod config;
 pub mod cli;
+pub mod config;
 pub mod export;
+pub mod profiler;
 
 // Re-export commonly used types
 pub use config::ArithmeticConfig;
