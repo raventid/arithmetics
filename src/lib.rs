@@ -6,6 +6,7 @@ pub mod error_analysis;
 pub mod cli;
 pub mod config;
 pub mod export;
+pub mod platform;
 pub mod profiler;
 
 // Re-export commonly used types
