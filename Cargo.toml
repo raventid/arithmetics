@@ -66,5 +66,9 @@ harness = false
 name = "cross_platform_compatibility"
 harness = false
 
+[[bench]]
+name = "error_analysis_benchmarks"
+harness = false
+
 [dev-dependencies]
 criterion = "0.5"
