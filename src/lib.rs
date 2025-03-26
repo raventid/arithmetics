@@ -10,6 +10,7 @@ pub mod gpu;
 pub mod platform;
 pub mod profiler;
 pub mod regression;
+pub mod visualization;
 
 // Re-export commonly used types
 pub use config::ArithmeticConfig;
