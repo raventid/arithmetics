@@ -35,10 +35,6 @@ name = "complex_operations"
 harness = false
 
 [[bench]]
-name = "batch_operations"
-harness = false
-
-[[bench]]
 name = "fixed_point"
 harness = false
 
