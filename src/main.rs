@@ -3,7 +3,6 @@ use bigdecimal::BigDecimal;
 use std::str::FromStr;
 
 pub mod precision;
-pub mod safety;
 pub mod validation;
 pub mod profiling;
 pub mod error_analysis;
@@ -11,7 +10,6 @@ pub mod config;
 pub mod cli;
 pub mod export;
 use precision::{PrecisionAnalyzer, memory::MemoryAnalyzer};
-use safety::SafetyAnalyzer;
 use validation::ValidationSuite;
 use profiling::PerformanceProfiler;
 use error_analysis::AdvancedErrorAnalyzer;
@@ -78,11 +76,6 @@ fn run_default_analysis() -> Result<(), Box<dyn std::error::Error>> {
     // Run memory analysis
     MemoryAnalyzer::analyze_memory_footprint();
     MemoryAnalyzer::analyze_allocation_patterns();
-    
-    // Run safety analysis
-    SafetyAnalyzer::test_overflow_detection();
-    SafetyAnalyzer::test_division_by_zero();
-    SafetyAnalyzer::test_precision_loss();
     
     // Run performance profiling
     println!("\n=== Performance Profiling ===");

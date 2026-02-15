@@ -1,5 +1,4 @@
 pub mod precision;
-pub mod safety;
 pub mod validation;
 pub mod profiling;
 pub mod error_analysis;
