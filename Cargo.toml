@@ -51,10 +51,6 @@ name = "real_world_applications"
 harness = false
 
 [[bench]]
-name = "cross_platform_compatibility"
-harness = false
-
-[[bench]]
 name = "error_analysis_benchmarks"
 harness = false
 
