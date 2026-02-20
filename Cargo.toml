@@ -50,9 +50,5 @@ harness = false
 name = "real_world_applications"
 harness = false
 
-[[bench]]
-name = "error_analysis_benchmarks"
-harness = false
-
 [dev-dependencies]
 criterion = "0.5"
