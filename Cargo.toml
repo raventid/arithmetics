@@ -43,10 +43,6 @@ name = "half_precision"
 harness = false
 
 [[bench]]
-name = "multithreaded_operations"
-harness = false
-
-[[bench]]
 name = "real_world_applications"
 harness = false
 
