@@ -38,9 +38,5 @@ harness = false
 name = "fixed_point"
 harness = false
 
-[[bench]]
-name = "half_precision"
-harness = false
-
 [dev-dependencies]
 criterion = "0.5"
