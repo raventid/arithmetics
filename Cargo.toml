@@ -34,9 +34,5 @@ harness = false
 name = "complex_operations"
 harness = false
 
-[[bench]]
-name = "fixed_point"
-harness = false
-
 [dev-dependencies]
 criterion = "0.5"
