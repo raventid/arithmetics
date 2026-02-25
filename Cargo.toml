@@ -30,9 +30,5 @@ winapi = { version = "0.3", features = ["sysinfoapi"] }
 name = "arithmetic_comparison"
 harness = false
 
-[[bench]]
-name = "complex_operations"
-harness = false
-
 [dev-dependencies]
 criterion = "0.5"
