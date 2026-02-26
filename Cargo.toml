@@ -26,9 +26,5 @@ libc = "0.2"
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["sysinfoapi"] }
 
-[[bench]]
-name = "arithmetic_comparison"
-harness = false
-
 [dev-dependencies]
 criterion = "0.5"
