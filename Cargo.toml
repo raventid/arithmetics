@@ -7,7 +7,7 @@ description = "Comprehensive comparison and benchmarking of Rust arithmetic libr
 license = "MIT"
 
 [dependencies]
-rust_decimal = "1.33"
+rust_decimal = "1.42"
 bigdecimal = "0.4"
 fixed = "1.24"
 half = "2.3"
