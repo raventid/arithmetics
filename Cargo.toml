@@ -8,8 +8,8 @@ license = "MIT"
 
 [dependencies]
 rust_decimal = "1.42"
-bigdecimal = "0.4"
-fixed = "1.24"
+bigdecimal = "0.4.10"
+fixed = "1.31"
 half = "2.3"
 
 [dev-dependencies]
