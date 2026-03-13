@@ -10,7 +10,7 @@ license = "MIT"
 rust_decimal = "1.42"
 bigdecimal = "0.4.10"
 fixed = "1.31"
-half = "2.3"
+half = "2.7"
 
 [dev-dependencies]
 criterion = "0.5"
