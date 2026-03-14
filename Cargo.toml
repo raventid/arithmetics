@@ -13,4 +13,4 @@ fixed = "1.31"
 half = "2.7"
 
 [dev-dependencies]
-criterion = "0.5"
+criterion = "0.8"
