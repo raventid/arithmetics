@@ -11,6 +11,7 @@ rust_decimal = "1.42"
 bigdecimal = "0.4.10"
 fixed = "1.31"
 half = "2.7"
+fastnum = "0.7"
 
 [dev-dependencies]
 criterion = "0.8"
