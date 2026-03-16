@@ -2,6 +2,7 @@
 name = "arithmetics"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.86"
 authors = ["raventid"]
 description = "Comprehensive comparison and benchmarking of Rust arithmetic libraries"
 license = "MIT"
@@ -15,3 +16,7 @@ fastnum = "0.7"
 
 [dev-dependencies]
 criterion = "0.8"
+
+[profile.bench]
+lto = true
+codegen-units = 1
