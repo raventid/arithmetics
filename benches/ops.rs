@@ -77,6 +77,18 @@ fn add(c: &mut Criterion) {
     bench_all_types!(c, "add", +);
 }
 
+fn mul(c: &mut Criterion) {
+    bench_all_types!(c, "mul", *);
+}
+
+/// Division cost depends on how many digits each type computes: floats and
+/// fixed-point round to their fixed width, rust_decimal to 28 significant
+/// digits, fastnum to its 128-bit context, BigDecimal to a default of 100
+/// significant digits. That asymmetry is the honest out-of-the-box cost.
+fn div(c: &mut Criterion) {
+    bench_all_types!(c, "div", /);
+}
+
 fn config() -> Criterion {
     Criterion::default()
         .warm_up_time(Duration::from_secs(1))
@@ -86,6 +98,6 @@ fn config() -> Criterion {
 criterion_group! {
     name = benches;
     config = config();
-    targets = add
+    targets = add, mul, div
 }
 criterion_main!(benches);
