@@ -18,6 +18,10 @@ fastnum = "0.7"
 name = "ops"
 harness = false
 
+[[bench]]
+name = "aggregate"
+harness = false
+
 [dev-dependencies]
 criterion = "0.8"
 
