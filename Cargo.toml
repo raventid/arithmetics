@@ -26,6 +26,10 @@ harness = false
 name = "convert"
 harness = false
 
+[[bench]]
+name = "real_world"
+harness = false
+
 [dev-dependencies]
 criterion = "0.8"
 
