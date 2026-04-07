@@ -6,15 +6,20 @@
 use std::hint::black_box;
 use std::time::Duration;
 
-use bigdecimal::BigDecimal;
-use criterion::{criterion_group, criterion_main, Criterion};
+use bigdecimal::{BigDecimal, Zero};
+use criterion::{criterion_group, criterion_main, Criterion, Throughput};
 use fastnum::D128;
 use fixed::types::{I32F32, I64F64};
 use half::{bf16, f16};
 use rust_decimal::Decimal;
 
+use arithmetics::{decimal_strings, parse_all, Lcg};
+
 /// Compounding periods for the interest scenario.
 const PERIODS: usize = 30;
+
+/// Line items on the invoice.
+const ITEMS: usize = 200;
 
 /// 1000.00 at 5% over 30 annual periods, iterated for every type — no
 /// closed-form `powi` shortcut for the floats, so all types perform the
@@ -65,6 +70,79 @@ fn compound_interest(c: &mut Criterion) {
     group.finish();
 }
 
+/// Sum of 200 qty × unit-price line items plus one final division for the
+/// average line value. Quantities are small integers (1..=5), prices are
+/// 1.00..=20.00, so the grand total tops out at 20 000 — still f16 range.
+macro_rules! bench_invoice {
+    ($group:expr, $label:expr, $qtys:expr, $prices:expr, $zero:expr, $count:expr) => {{
+        let (qtys, prices, count) = (&$qtys, &$prices, $count);
+        $group.bench_function($label, |b| {
+            b.iter(|| {
+                let mut total = $zero;
+                for (q, p) in black_box(qtys).iter().zip(black_box(prices).iter()) {
+                    total = total + *q * *p;
+                }
+                black_box(total / count)
+            })
+        });
+    }};
+    (ref $group:expr, $label:expr, $qtys:expr, $prices:expr, $zero:expr, $count:expr) => {{
+        let (qtys, prices, count) = (&$qtys, &$prices, &$count);
+        $group.bench_function($label, |b| {
+            b.iter(|| {
+                let mut total = $zero;
+                for (q, p) in black_box(qtys).iter().zip(black_box(prices).iter()) {
+                    total = total + q * p;
+                }
+                black_box(&total / count)
+            })
+        });
+    }};
+}
+
+fn invoice_total(c: &mut Criterion) {
+    let mut rng = Lcg::new(0x1CE);
+    let qty_strings: Vec<String> = (0..ITEMS).map(|_| (1 + rng.next() % 5).to_string()).collect();
+    let price_strings = decimal_strings(0xF00D, ITEMS, 2, 100, 2_000);
+    let count = ITEMS.to_string();
+
+    let mut group = c.benchmark_group("invoice_total");
+    group.sample_size(50);
+    group.throughput(Throughput::Elements(ITEMS as u64));
+    macro_rules! row {
+        ($label:expr, $t:ty, $zero:expr) => {
+            bench_invoice!(
+                group,
+                $label,
+                parse_all::<$t>(&qty_strings),
+                parse_all::<$t>(&price_strings),
+                $zero,
+                count.parse::<$t>().unwrap()
+            )
+        };
+        (ref $label:expr, $t:ty, $zero:expr) => {
+            bench_invoice!(
+                ref group,
+                $label,
+                parse_all::<$t>(&qty_strings),
+                parse_all::<$t>(&price_strings),
+                $zero,
+                count.parse::<$t>().unwrap()
+            )
+        };
+    }
+    row!("f32", f32, 0.0f32);
+    row!("f64", f64, 0.0f64);
+    row!("f16", f16, f16::ZERO);
+    row!("bf16", bf16, bf16::ZERO);
+    row!("i32f32", I32F32, I32F32::ZERO);
+    row!("i64f64", I64F64, I64F64::ZERO);
+    row!("rust_decimal", Decimal, Decimal::ZERO);
+    row!(ref "bigdecimal", BigDecimal, BigDecimal::zero());
+    row!("fastnum_d128", D128, D128::ZERO);
+    group.finish();
+}
+
 fn config() -> Criterion {
     Criterion::default()
         .warm_up_time(Duration::from_secs(1))
@@ -74,6 +152,6 @@ fn config() -> Criterion {
 criterion_group! {
     name = benches;
     config = config();
-    targets = compound_interest
+    targets = compound_interest, invoice_total
 }
 criterion_main!(benches);
