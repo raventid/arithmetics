@@ -21,6 +21,10 @@ const PERIODS: usize = 30;
 /// Line items on the invoice.
 const ITEMS: usize = 200;
 
+/// FIR filter dimensions: TAPS-tap kernel over SAMPLES input samples.
+const SAMPLES: usize = 256;
+const TAPS: usize = 32;
+
 /// 1000.00 at 5% over 30 annual periods, iterated for every type — no
 /// closed-form `powi` shortcut for the floats, so all types perform the
 /// same 30 mul + 30 add. The final balance (~4321.94) fits f16's range.
@@ -143,6 +147,85 @@ fn invoice_total(c: &mut Criterion) {
     group.finish();
 }
 
+/// 32-tap FIR filter over a 256-sample signal — the classic fixed-point
+/// versus float DSP workload; the decimal types are included to quantify
+/// what exact arithmetic costs in a kernel like this. Signal values sit in
+/// 0.001..=0.999 and taps in 0.001..=0.062 (kernel sum <= 2), so every
+/// accumulator stays around 2 — comfortably in range for every type.
+macro_rules! bench_fir {
+    ($group:expr, $label:expr, $signal:expr, $taps:expr, $zero:expr) => {{
+        let (signal, taps) = (&$signal, &$taps);
+        $group.bench_function($label, |b| {
+            b.iter(|| {
+                let signal = black_box(signal);
+                let taps = black_box(taps);
+                for i in 0..(SAMPLES - TAPS) {
+                    let mut acc = $zero;
+                    for (k, t) in taps.iter().enumerate() {
+                        acc = acc + signal[i + k] * *t;
+                    }
+                    black_box(acc);
+                }
+            })
+        });
+    }};
+    (ref $group:expr, $label:expr, $signal:expr, $taps:expr, $zero:expr) => {{
+        let (signal, taps) = (&$signal, &$taps);
+        $group.bench_function($label, |b| {
+            b.iter(|| {
+                let signal = black_box(signal);
+                let taps = black_box(taps);
+                for i in 0..(SAMPLES - TAPS) {
+                    let mut acc = $zero;
+                    for (k, t) in taps.iter().enumerate() {
+                        acc = acc + &signal[i + k] * t;
+                    }
+                    black_box(acc);
+                }
+            })
+        });
+    }};
+}
+
+fn fir_filter(c: &mut Criterion) {
+    let signal_strings = decimal_strings(0x51C, SAMPLES, 3, 1, 999);
+    let tap_strings = decimal_strings(0x7A9, TAPS, 3, 1, 62);
+
+    let mut group = c.benchmark_group("fir_filter");
+    group.sample_size(50);
+    group.throughput(Throughput::Elements((SAMPLES - TAPS) as u64));
+    macro_rules! row {
+        ($label:expr, $t:ty, $zero:expr) => {
+            bench_fir!(
+                group,
+                $label,
+                parse_all::<$t>(&signal_strings),
+                parse_all::<$t>(&tap_strings),
+                $zero
+            )
+        };
+        (ref $label:expr, $t:ty, $zero:expr) => {
+            bench_fir!(
+                ref group,
+                $label,
+                parse_all::<$t>(&signal_strings),
+                parse_all::<$t>(&tap_strings),
+                $zero
+            )
+        };
+    }
+    row!("f32", f32, 0.0f32);
+    row!("f64", f64, 0.0f64);
+    row!("f16", f16, f16::ZERO);
+    row!("bf16", bf16, bf16::ZERO);
+    row!("i32f32", I32F32, I32F32::ZERO);
+    row!("i64f64", I64F64, I64F64::ZERO);
+    row!("rust_decimal", Decimal, Decimal::ZERO);
+    row!(ref "bigdecimal", BigDecimal, BigDecimal::zero());
+    row!("fastnum_d128", D128, D128::ZERO);
+    group.finish();
+}
+
 fn config() -> Criterion {
     Criterion::default()
         .warm_up_time(Duration::from_secs(1))
@@ -152,6 +235,6 @@ fn config() -> Criterion {
 criterion_group! {
     name = benches;
     config = config();
-    targets = compound_interest, invoice_total
+    targets = compound_interest, invoice_total, fir_filter
 }
 criterion_main!(benches);
