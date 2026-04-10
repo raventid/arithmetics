@@ -84,3 +84,36 @@ fn accumulation_f16_stalls() {
     }
     assert_eq!(sum, f16::from_f32(256.0));
 }
+
+/// The textbook example: 0.1 + 0.2 is exactly 0.3 in decimal radix.
+#[test]
+fn zero_one_plus_zero_two_decimal_radix() {
+    let sum = Decimal::from_str("0.1").unwrap() + Decimal::from_str("0.2").unwrap();
+    assert_eq!(sum, Decimal::from_str("0.3").unwrap());
+
+    let sum = BigDecimal::from_str("0.1").unwrap() + BigDecimal::from_str("0.2").unwrap();
+    assert_eq!(sum, BigDecimal::from_str("0.3").unwrap());
+
+    let sum = "0.1".parse::<D128>().unwrap() + "0.2".parse::<D128>().unwrap();
+    assert_eq!(sum, "0.3".parse::<D128>().unwrap());
+}
+
+/// ...and famously not 0.3 in f64, where 0.1 + 0.2 is
+/// 0.30000000000000004440892098500626.
+#[test]
+fn zero_one_plus_zero_two_f64() {
+    assert_ne!(0.1_f64 + 0.2_f64, 0.3_f64);
+}
+
+/// Binary fixed-point cannot represent 0.1 / 0.2 / 0.3 either, but with
+/// 32 fractional bits the three rounding errors happen to cancel, so the
+/// comparison holds by coincidence. That 0.1 itself is inexact shows as
+/// soon as you multiply: 0.1 × 10 ≠ 1.
+#[test]
+fn zero_one_plus_zero_two_i32f32() {
+    let a = I32F32::from_str("0.1").unwrap();
+    let b = I32F32::from_str("0.2").unwrap();
+    let c = I32F32::from_str("0.3").unwrap();
+    assert_eq!(a + b, c);
+    assert_ne!(a * I32F32::from_num(10), I32F32::ONE);
+}
