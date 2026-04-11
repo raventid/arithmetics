@@ -117,3 +117,37 @@ fn zero_one_plus_zero_two_i32f32() {
     assert_eq!(a + b, c);
     assert_ne!(a * I32F32::from_num(10), I32F32::ONE);
 }
+
+/// (1 ÷ 3) × 3 in f64 comes back to exactly 1.0: the multiply's rounding
+/// error cancels the divide's. An IEEE 754 quirk worth knowing when you
+/// see it — not a sign that f64 division is exact.
+#[test]
+fn one_third_round_trip_f64() {
+    assert_eq!((1.0_f64 / 3.0) * 3.0, 1.0);
+}
+
+/// Fixed-scale decimals have no such luck: 1/3 truncates at the type's
+/// precision limit and the multiply faithfully returns 0.999…9.
+#[test]
+fn one_third_round_trip_decimals() {
+    // rust_decimal: 28 significant digits.
+    let round = (Decimal::ONE / Decimal::from(3)) * Decimal::from(3);
+    assert_ne!(round, Decimal::ONE);
+    let err = Decimal::ONE - round;
+    assert!(err > Decimal::ZERO && err < Decimal::new(1, 27), "err = {err}");
+
+    // BigDecimal: division computes 100 significant digits by default.
+    let round = (BigDecimal::from(1) / BigDecimal::from(3)) * BigDecimal::from(3);
+    assert_ne!(round, BigDecimal::from(1));
+    let err = BigDecimal::from(1) - &round;
+    assert!(
+        err > BigDecimal::from(0) && err < BigDecimal::from_str("1e-99").unwrap(),
+        "err = {err}"
+    );
+
+    // fastnum D128 behaves like f64 here, not like the other decimals: its
+    // 128-bit coefficient holds one digit beyond the nominal 38, so the
+    // multiply rounds 0.999…9 back up to exactly 1.
+    let round = (D128::ONE / "3".parse::<D128>().unwrap()) * "3".parse::<D128>().unwrap();
+    assert_eq!(round, D128::ONE);
+}
