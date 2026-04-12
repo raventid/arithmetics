@@ -5,8 +5,9 @@ use std::str::FromStr;
 
 use bigdecimal::BigDecimal;
 use fastnum::D128;
-use fixed::types::I32F32;
-use half::f16;
+use fixed::types::{I32F32, I64F64};
+use half::{bf16, f16};
+use rust_decimal::prelude::ToPrimitive;
 use rust_decimal::Decimal;
 
 const STEPS: usize = 10_000;
@@ -150,4 +151,44 @@ fn one_third_round_trip_decimals() {
     // multiply rounds 0.999…9 back up to exactly 1.
     let round = (D128::ONE / "3".parse::<D128>().unwrap()) * "3".parse::<D128>().unwrap();
     assert_eq!(round, D128::ONE);
+}
+
+/// The same 30-period compound-interest loop the benchmarks run, checked
+/// for cross-type agreement against the rust_decimal result. The bounds
+/// are what each representation actually earns: wide for the 16-bit
+/// floats, tight for everything with 50+ bits of significand.
+macro_rules! compound {
+    ($t:ty) => {{
+        let mut balance: $t = "1000.00".parse().unwrap();
+        let rate: $t = "0.05".parse().unwrap();
+        for _ in 0..30 {
+            balance = balance + balance * rate;
+        }
+        balance
+    }};
+    (ref $t:ty) => {{
+        let mut balance: $t = "1000.00".parse().unwrap();
+        let rate: $t = "0.05".parse().unwrap();
+        for _ in 0..30 {
+            balance = &balance + &balance * &rate;
+        }
+        balance
+    }};
+}
+
+#[test]
+fn compound_interest_cross_agreement() {
+    let reference = compound!(Decimal).to_f64().unwrap();
+    // 1000 × 1.05^30, the closed-form anchor.
+    assert!((reference - 4321.942375150668).abs() < 1e-9);
+
+    let rel = |x: f64| ((x - reference) / reference).abs();
+    assert!(rel(compound!(f64)) < 1e-12);
+    assert!(rel(compound!(f32) as f64) < 1e-3);
+    assert!(rel(compound!(f16).to_f64()) < 0.15, "f16: {}", compound!(f16));
+    assert!(rel(compound!(bf16).to_f64()) < 0.25, "bf16: {}", compound!(bf16));
+    assert!(rel(compound!(I32F32).to_num::<f64>()) < 1e-6);
+    assert!(rel(compound!(I64F64).to_num::<f64>()) < 1e-12);
+    assert!(rel(compound!(ref BigDecimal).to_f64().unwrap()) < 1e-12);
+    assert!(rel(compound!(D128).to_f64()) < 1e-12);
 }
