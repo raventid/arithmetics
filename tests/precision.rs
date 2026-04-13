@@ -192,3 +192,22 @@ fn compound_interest_cross_agreement() {
     assert!(rel(compound!(ref BigDecimal).to_f64().unwrap()) < 1e-12);
     assert!(rel(compound!(D128).to_f64()) < 1e-12);
 }
+
+/// Memory footprint of a single value. BigDecimal is the only heap-backed
+/// type, so its stack size is just the handle — the layout is not
+/// contractual, only that it is bigger and allocates per value.
+#[test]
+fn type_sizes() {
+    use std::mem::size_of;
+    assert_eq!(size_of::<f16>(), 2);
+    assert_eq!(size_of::<bf16>(), 2);
+    assert_eq!(size_of::<f32>(), 4);
+    assert_eq!(size_of::<f64>(), 8);
+    assert_eq!(size_of::<I32F32>(), 8);
+    assert_eq!(size_of::<I64F64>(), 16);
+    assert_eq!(size_of::<Decimal>(), 16);
+    // fastnum trades footprint for speed and diagnostics: a 128-bit
+    // coefficient plus exponent and context flags.
+    assert_eq!(size_of::<D128>(), 24);
+    assert!(size_of::<BigDecimal>() >= 24);
+}
