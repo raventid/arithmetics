@@ -82,6 +82,19 @@ fn sum(c: &mut Criterion) {
     bench_sum!(group, "rust_decimal", parse_all::<Decimal>(&sa), Decimal::ZERO);
     bench_sum!(ref group, "bigdecimal", parse_all::<BigDecimal>(&sa), BigDecimal::zero());
     bench_sum!(group, "fastnum_d128", parse_all::<D128>(&sa), D128::ZERO);
+
+    // The pattern ML code actually uses: 16-bit storage, f32 accumulator.
+    // Contrast with the plain "f16"/"bf16" rows, whose 16-bit accumulator
+    // both costs conversions per step and stalls once the sum outgrows the
+    // element magnitude.
+    let f16s: Vec<f16> = parse_all(&sa);
+    group.bench_function("f16_f32acc", |b| {
+        b.iter(|| black_box(black_box(&f16s).iter().fold(0.0f32, |acc, x| acc + x.to_f32())))
+    });
+    let bf16s: Vec<bf16> = parse_all(&sa);
+    group.bench_function("bf16_f32acc", |b| {
+        b.iter(|| black_box(black_box(&bf16s).iter().fold(0.0f32, |acc, x| acc + x.to_f32())))
+    });
     group.finish();
 }
 
