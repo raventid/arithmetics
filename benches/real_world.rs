@@ -192,7 +192,9 @@ fn fir_filter(c: &mut Criterion) {
     let tap_strings = decimal_strings(0x7A9, TAPS, 3, 1, 62);
 
     let mut group = c.benchmark_group("fir_filter");
-    group.sample_size(50);
+    // Iterations here are long (BigDecimal ~150 µs) and stable; 30 samples
+    // keeps the whole suite's wall time down without hurting the estimate.
+    group.sample_size(30);
     group.throughput(Throughput::Elements((SAMPLES - TAPS) as u64));
     macro_rules! row {
         ($label:expr, $t:ty, $zero:expr) => {
