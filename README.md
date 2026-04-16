@@ -1,258 +1,44 @@
-# Arithmetic Libraries Comparison Project
+# arithmetics
 
-A comprehensive benchmarking and analysis suite for comparing different arithmetic libraries in Rust, focusing on precision, performance, memory usage, and safety characteristics.
+Microbenchmarks comparing Rust numeric types — native floats, decimals,
+binary fixed-point and half-precision floats — for speed, per-value memory
+cost, and (in the test suite) where each representation is exact and where
+it drifts.
 
-## Project Overview
+## Types under test
 
-This project provides an extensive comparison of various arithmetic libraries available in Rust, including:
+| Label | Type | Crate | Stack size | Representation |
+|---|---|---|---|---|
+| `f32` / `f64` | built-in | — | 4 / 8 B | IEEE 754 binary floating point |
+| `f16` | `half::f16` | half 2.7.1 | 2 B | IEEE 754 binary16 |
+| `bf16` | `half::bf16` | half 2.7.1 | 2 B | bfloat16 (truncated f32) |
+| `i32f32` | `fixed::types::I32F32` | fixed 1.31.0 | 8 B | binary fixed-point, 32 int + 32 frac bits |
+| `i64f64` | `fixed::types::I64F64` | fixed 1.31.0 | 16 B | binary fixed-point, 64 int + 64 frac bits |
+| `rust_decimal` | `rust_decimal::Decimal` | rust_decimal 1.42.1 | 16 B | decimal, 96-bit mantissa, 28 significant digits |
+| `bigdecimal` | `bigdecimal::BigDecimal` | bigdecimal 0.4.10 | handle + heap | decimal, arbitrary precision, allocates per value |
+| `fastnum_d128` | `fastnum::D128` | fastnum 0.7.5 | 24 B | decimal, 128-bit coefficient, ~38 significant digits |
 
-- **Standard f64**: IEEE 754 double-precision floating-point
-- **rust_decimal**: Fixed-point decimal arithmetic with 28-digit precision
-- **bigdecimal**: Arbitrary precision decimal arithmetic
-- **decimal/d128**: IEEE 754-2008 decimal128 floating-point
-- **fixed**: Fixed-point arithmetic with configurable precision
-- **half**: Half-precision floating-point (f16 and bf16)
+The `decimal` (d128) crate this repository used to include was dropped in
+the rewrite: unmaintained since 2018, its C build no longer compiles on
+current stable Rust.
 
-## Features
+## What is measured
 
-### Comprehensive Benchmarking
-- **Basic Operations**: Addition, subtraction, multiplication, division
-- **Complex Operations**: Square root, power functions, trigonometric operations
-- **Batch Operations**: Statistical computations, vector operations
-- **Fixed-Point Arithmetic**: Multiple precision configurations
-- **Half-Precision**: f16 and bf16 benchmarks
+| Bench file | Groups | Workload |
+|---|---|---|
+| `benches/ops.rs` | `add`, `mul`, `div` | one scalar operation over 1000 hoisted element pairs |
+| `benches/aggregate.rs` | `sum`, `dot` | array reductions with each type's own accumulator (plus f32-accumulator variants for f16/bf16) |
+| `benches/convert.rs` | `parse`, `display`, `from_f64`, `to_f64` | boundary crossings: strings and f64 round-trips |
+| `benches/real_world.rs` | `compound_interest`, `invoice_total`, `fir_filter` | small matched-algorithm application kernels |
 
-### Advanced Analysis
-- **Precision Analysis**: Accumulation error testing, small number precision
-- **Memory Analysis**: Memory footprint, allocation patterns
-- **Safety Analysis**: Overflow detection, division-by-zero handling
-- **Error Analysis**: Floating-point precision errors, catastrophic cancellation
-- **Performance Profiling**: Detailed timing analysis with statistical metrics
-- **Cross-Platform Testing**: Platform-specific behavior validation
-- **GPU Acceleration**: CUDA/OpenCL acceleration analysis
-- **SIMD Optimization**: Vector instruction utilization
-- **Multi-threading**: Parallel processing performance analysis
-- **Regression Testing**: Automated performance regression detection
-- **Interactive Visualization**: HTML reports with dynamic charts
+`tests/precision.rs` covers the accuracy side: accumulation drift,
+0.1 + 0.2 representability, (1/3) × 3 round-trips, cross-type agreement on
+the compound-interest kernel, and per-value memory sizes.
 
-### Validation & Testing
-- **Cross-Library Consistency**: Validation of arithmetic results across libraries
-- **Edge Case Testing**: Large numbers, very small numbers, precision limits
-- **Mathematical Properties**: Associativity, commutativity, distributivity
-- **Integration Tests**: Comprehensive test suite for all functionality
+## Results
 
-## Module Structure
-
-```
-src/
-├── main.rs              # Main application with example usage
-├── lib.rs               # Public module exports
-├── cli.rs               # Command-line interface with clap
-├── config.rs            # TOML configuration management
-├── export.rs            # Multi-format result export (JSON, CSV, HTML)
-├── error_analysis.rs    # Advanced error analysis and ULP calculations
-├── gpu.rs               # GPU acceleration analysis and simulation
-├── platform.rs          # Cross-platform compatibility testing
-├── profiler.rs          # Performance and memory profiling tools
-├── regression.rs        # Automated performance regression testing
-└── visualization.rs     # Interactive HTML reports and charts
-
-benches/
-├── arithmetic_comparison.rs     # Basic arithmetic benchmarks
-├── complex_operations.rs        # Complex mathematical operations
-├── batch_operations.rs          # Batch and statistical operations
-├── fixed_point.rs              # Fixed-point arithmetic benchmarks
-├── half_precision.rs           # Half-precision floating-point benchmarks
-├── simd_operations.rs          # SIMD optimization benchmarks
-├── multithreaded_operations.rs # Multi-threading performance analysis
-├── real_world_applications.rs  # Financial, scientific, gaming benchmarks
-├── profiling_benchmarks.rs     # Memory and cache performance analysis
-├── cross_platform_compatibility.rs # Platform-specific optimization tests
-├── error_analysis_benchmarks.rs    # Error detection performance tests
-└── integration_tests.rs        # Comprehensive integration testing
-
-tests/
-└── unit_tests.rs        # Unit tests for all modules
-```
-
-## Dependencies
-
-### Core Libraries
-- `rust_decimal` - High-precision decimal arithmetic
-- `bigdecimal` - Arbitrary precision decimal arithmetic  
-- `decimal` - IEEE 754-2008 decimal128 support
-- `fixed` - Fixed-point arithmetic types
-- `half` - Half-precision floating-point types
-
-### Development & Testing
-- `criterion` - Statistical benchmarking framework
-- Standard Rust testing framework for integration tests
-
-## Usage
-
-### Running the Main Application
-```bash
-cargo run
-```
-
-This executes all analysis modules including:
-- Validation tests
-- Basic arithmetic examples
-- Precision analysis
-- Memory analysis
-- Safety analysis
-- Performance profiling
-- Advanced error analysis
-
-### Running Benchmarks
-```bash
-# Run all benchmarks
-cargo bench
-
-# Run specific benchmark suites
-cargo bench arithmetic_comparison
-cargo bench complex_operations
-cargo bench batch_operations
-cargo bench fixed_point
-cargo bench half_precision
-```
-
-### Running Tests
-```bash
-# Run all tests
-cargo test
-
-# Run integration tests specifically
-cargo test --test integration_tests
-```
-
-### Benchmark Execution Script
-```bash
-# Use the provided benchmark script
-chmod +x benchmark.sh
-./benchmark.sh
-```
-
-## Analysis Results
-
-### Precision Characteristics
-- **f64**: IEEE 754 binary64, ~15-17 decimal digits precision
-- **rust_decimal**: Exact decimal representation, 28 digits precision
-- **bigdecimal**: Arbitrary precision, configurable scale
-- **d128**: IEEE 754 decimal128, 34 decimal digits precision
-- **fixed**: Configurable integer and fractional bits
-
-### Performance Characteristics
-- **f64**: Fastest for basic operations, hardware optimized
-- **fixed**: Very fast for configured precision ranges
-- **rust_decimal**: Good performance with exact decimal arithmetic
-- **d128**: Moderate performance with high precision
-- **bigdecimal**: Slower but handles arbitrary precision
-
-### Memory Usage
-- **f64**: 8 bytes, most memory efficient
-- **fixed**: Varies (2-16 bytes depending on configuration)
-- **rust_decimal**: 16 bytes with 28-digit precision
-- **d128**: 16 bytes with 34-digit precision  
-- **bigdecimal**: Variable size based on precision requirements
-
-### Safety Features
-- **Overflow Detection**: Analysis of numeric overflow behavior
-- **Division by Zero**: Handling of division by zero across libraries
-- **Precision Loss**: Detection and analysis of precision degradation
-
-## Key Findings
-
-### Precision vs Performance Trade-offs
-1. **f64** offers the best performance but suffers from typical floating-point precision issues
-2. **rust_decimal** provides exact decimal arithmetic with good performance for financial calculations
-3. **bigdecimal** offers arbitrary precision at the cost of increased memory and computation time
-4. **fixed-point** types provide excellent performance for specific precision requirements
-5. **half-precision** types are valuable for memory-constrained applications
-
-### Use Case Recommendations
-
-#### Financial Calculations
-- **Primary**: `rust_decimal` for exact decimal arithmetic
-- **Alternative**: `bigdecimal` for extended precision requirements
-
-#### Scientific Computing
-- **Primary**: `f64` for general computations
-- **High Precision**: `bigdecimal` or `d128` for critical calculations
-
-#### Gaming/Graphics
-- **Primary**: `f64` for general use
-- **Memory Constrained**: `f16` for large datasets
-- **Fixed Requirements**: `fixed` types for deterministic calculations
-
-#### Embedded Systems
-- **Primary**: `fixed` types for predictable performance
-- **Alternative**: `f16` for memory-constrained applications
-
-## Contributing
-
-This project welcomes contributions in the following areas:
-
-1. **Additional Libraries**: Integration of new arithmetic libraries
-2. **Benchmark Improvements**: Enhanced benchmarking methodologies
-3. **Analysis Modules**: New analysis techniques and metrics
-4. **Platform Testing**: Validation across different architectures
-5. **Documentation**: Improved documentation and examples
-
-## Building and Development
-
-### Prerequisites
-- Rust 1.70+ (for latest language features)
-- Cargo package manager
-
-### Development Setup
-```bash
-git clone <repository-url>
-cd arithmetics
-cargo build
-cargo test
-cargo bench
-```
-
-### Project Structure
-The project is organized into logical modules for easy maintenance and extension:
-
-- Core arithmetic functionality in `src/`
-- Benchmark suites in `benches/`
-- Integration tests in `tests/`
-- Documentation and examples in the root directory
-
-## Future Enhancements
-
-### Completed Features ✅
-- [x] Multi-threaded performance analysis
-- [x] SIMD optimization benchmarks
-- [x] GPU acceleration comparisons
-- [x] Cross-platform performance analysis
-- [x] Real-world application benchmarks
-- [x] Interactive result visualization
-- [x] Automated regression testing
-- [x] Performance trend analysis over time
-
-### Planned Features
-- [ ] WebAssembly performance comparison
-- [ ] Custom arithmetic implementations
-- [ ] Machine learning model performance analysis
-- [ ] Blockchain arithmetic optimization
-- [ ] IoT/embedded performance profiling
-
-### Research Areas
-- [ ] Hardware-specific optimizations
-- [ ] Custom arithmetic implementations
-- [ ] Compiler optimization impact analysis
-- [ ] Runtime vs compile-time precision trade-offs
+_Measured results land here._
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- The Rust community for excellent arithmetic libraries
-- Criterion.rs for statistical benchmarking capabilities
-- Contributors to rust_decimal, bigdecimal, decimal, fixed, and half crates
+MIT
