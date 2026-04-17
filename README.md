@@ -35,6 +35,29 @@ current stable Rust.
 0.1 + 0.2 representability, (1/3) × 3 round-trips, cross-type agreement on
 the compound-interest kernel, and per-value memory sizes.
 
+## Methodology
+
+- Setup (parsing, array construction) happens outside the timed closure;
+  only the operation under test runs inside `b.iter()`.
+- No single-op timing: a lone float add is sub-nanosecond, below the
+  harness's own overhead. Every group iterates over 1000-element hoisted
+  arrays and declares `Throughput::Elements`, so criterion reports a
+  per-element rate.
+- Inputs and results pass through `std::hint::black_box`, so the compiler
+  can neither constant-fold the arithmetic nor discard it.
+- Every comparison group runs the identical algorithm on identical inputs.
+  The compound-interest kernel is an explicit loop for the floats too — no
+  closed-form `powi` shortcut that would change the op count.
+- Benchmark state is re-initialized inside the timed closure; nothing
+  accumulates across iterations.
+- BigDecimal's per-operation heap allocation is deliberately left inside
+  the timed loop: allocation *is* part of that type's cost.
+- Single-threaded throughout. The previous multithreaded suite mostly
+  measured thread-pool construction, not arithmetic.
+- `[profile.bench]` pins `lto = true, codegen-units = 1` and `Cargo.lock`
+  is committed, so numbers are reproducible for a given machine and
+  toolchain.
+
 ## Results
 
 _Measured results land here._
