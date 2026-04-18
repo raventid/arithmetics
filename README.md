@@ -58,6 +58,26 @@ the compound-interest kernel, and per-value memory sizes.
   is committed, so numbers are reproducible for a given machine and
   toolchain.
 
+### Input ranges
+
+Inputs are generated as canonical decimal strings (`src/lib.rs`, seeded
+LCG — no `rand` dependency) and parsed per type during setup. A string
+with a fixed number of decimal places is exactly representable in every
+decimal type, so all types start from the same values; the binary types
+round once at construction, which is inherent to using them at all.
+
+Two ranges keep every intermediate result representable in **all** types —
+f16 tops out at 65 504 and saturates to infinity beyond it:
+
+- **R1** `1.00..=100.00` (2 dp), for `ops` and `convert`: sums ≤ 200,
+  products ≤ 10 000, divisors ≥ 1.
+- **R2** `0.500..=2.000` (3 dp), for `aggregate`: a 1000-element sum stays
+  ≤ 2 000 and a dot product ≤ 4 000.
+
+A single wider range (say 1–1000) looks harmless but silently overflows
+f16 on both products and array sums, turning its rows into `inf` — which
+benchmarks fast and means nothing.
+
 ## Results
 
 _Measured results land here._
