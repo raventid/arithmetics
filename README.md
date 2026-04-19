@@ -78,6 +78,26 @@ A single wider range (say 1–1000) looks harmless but silently overflows
 f16 on both products and array sums, turning its rows into `inf` — which
 benchmarks fast and means nothing.
 
+### Division is not apples-to-apples
+
+Each type computes a quotient to a different width, and that is the
+honest out-of-the-box cost, so the `div` group makes no attempt to
+normalize it:
+
+- floats and fixed-point round to their fixed bit width;
+- `rust_decimal` rounds to 28 significant digits;
+- `fastnum` D128 rounds to its 128-bit coefficient (~38 digits);
+- `BigDecimal` computes **100 significant digits** by default (a
+  compile-time setting, `RUST_BIGDECIMAL_DEFAULT_PRECISION`) — a large
+  part of why its `div` row is the slowest.
+
+Related: exact decimal arithmetic grows digits instead of rounding. In the
+compound-interest kernel BigDecimal's scale grows by 2 digits per period
+(60 fractional digits after 30 periods); the fixed-width types round every
+step instead. Same algorithm, structurally different work — that trade is
+the point of the comparison. The scenario kernels therefore avoid division
+inside loops, so digit growth stays bounded and comparable.
+
 ## Results
 
 _Measured results land here._
