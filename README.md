@@ -98,6 +98,21 @@ step instead. Same algorithm, structurally different work — that trade is
 the point of the comparison. The scenario kernels therefore avoid division
 inside loops, so digit growth stays bounded and comparable.
 
+## Running
+
+```sh
+cargo bench                     # everything (~6 min)
+cargo bench --bench ops         # one suite
+cargo bench -- 'div/'           # one group across suites
+cargo bench -- 'add/fastnum'    # one benchmark
+cargo test                      # precision suite + doctests
+cargo bench -- --test           # smoke-run every benchmark once, no timing
+```
+
+Criterion writes reports to `target/criterion/<group>/<bench>/`, including
+an HTML `report/index.html` per benchmark and comparisons against the
+previous run.
+
 ## Results
 
 _Measured results land here._
