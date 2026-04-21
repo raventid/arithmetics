@@ -115,7 +115,53 @@ previous run.
 
 ## Results
 
-_Measured results land here._
+Measured 2026-04-21 on an Apple M4 Pro, rustc 1.96.0, macOS — one machine,
+one toolchain; rerun locally before drawing conclusions for your target.
+
+Micro-benchmarks, **ns per element** (lower is better; mid estimate):
+
+| Type | add | mul | div | sum | dot | parse | display | from_f64 | to_f64 |
+|---|---|---|---|---|---|---|---|---|---|
+| `f32` | 0.26 | 0.26 | 0.26 | 0.44 | 0.45 | — | — | — | — |
+| `f64` | 0.26 | 0.26 | 0.26 | 0.44 | 0.47 | 5.75 | 44.0 | — | — |
+| `f16` | 0.26 | 0.26 | 0.26 | 3.02 | 3.02 | 5.81 | 54.8 | 0.26 | 0.25 |
+| `bf16` | 1.02 | 1.02 | 1.07 | 6.78 | 6.89 | 6.01 | 47.7 | 0.72 | 0.54 |
+| `i32f32` | 0.27 | 0.33 | 4.24 | 0.05 | 0.29 | 25.0 | 40.6 | 1.48 | 0.82 |
+| `i64f64` | 0.32 | 0.72 | 26.5 | 0.18 | 0.82 | — | — | — | — |
+| `rust_decimal` | 1.01 | 1.26 | 15.6 | 1.25 | 1.75 | 3.84 | 26.5 | 142 | 6.85 |
+| `bigdecimal` | 29.3 | 13.5 | 3,484 | 13.3 | 18.1 | 43.8 | 57.2 | 158 | 54.7 |
+| `fastnum_d128` | 3.35 | 4.06 | 61.3 | 5.33 | 7.28 | 7.35 | 44.9 | 60.5 | 1.76 |
+| `f16_f32acc` | — | — | — | 0.58 | — | — | — | — | — |
+| `bf16_f32acc` | — | — | — | 0.47 | — | — | — | — | — |
+
+Application kernels (lower is better; mid estimate):
+
+| Type | compound_interest, ns/kernel | invoice_total, ns/item | fir_filter, ns/output |
+|---|---|---|---|
+| `f32` | 6.43 | 0.26 | 9.36 |
+| `f64` | 6.43 | 0.33 | 9.38 |
+| `f16` | 6.41 | 2.38 | 29.6 |
+| `bf16` | 291 | 6.59 | 142 |
+| `i32f32` | 30.5 | 0.35 | 10.3 |
+| `i64f64` | 53.9 | 0.98 | 32.9 |
+| `rust_decimal` | 921 | 2.81 | 101 |
+| `bigdecimal` | 2,110 | 31.2 | 686 |
+| `fastnum_d128` | 799 | 7.63 | 243 |
+
+Reading the numbers:
+
+- Between the fixed-width decimals, `rust_decimal` leads arithmetic and
+  string handling by ~2–4× over `fastnum_d128`, which wins the f64
+  round-trips; `bigdecimal` trails both by 10–100× everywhere.
+- `div` spreads the field the most: 0.26 ns (floats) → 15.6 (`rust_decimal`,
+  28 digits) → 61 (`fastnum`) → 3,484 (`BigDecimal`, 100 digits by default).
+- `i32f32`'s 0.05 ns/element `sum` is real: an integer fold is associative,
+  so LLVM vectorizes it — something it may not do for float folds.
+- The `f16` rows equal `f32` on scalar ops because this CPU has hardware
+  FP16 (see caveat below); `bf16` stays software and pays ~4×.
+- `sum/f16` vs `sum/f16_f32acc` (3.02 vs 0.58) is the serial dependency
+  chain through a 16-bit accumulator versus the widen-then-fold pattern —
+  and per `tests/precision.rs`, the 16-bit accumulator also stalls at 256.
 
 ## License
 
