@@ -163,6 +163,26 @@ Reading the numbers:
   chain through a 16-bit accumulator versus the widen-then-fold pattern —
   and per `tests/precision.rs`, the 16-bit accumulator also stalls at 256.
 
+## Precision findings
+
+From `tests/precision.rs` (all asserted, not folklore):
+
+- **0.1 added 10 000 times**: exactly 1000 for all three decimal types.
+  f64 lands ~1.6e-8 off, f32 ~3e-2, `i32f32` ~2e-7 — and `f16` stops at
+  **256**, because from there its spacing is 0.25 and adding 0.1 rounds to
+  a no-op.
+- **0.1 + 0.2 == 0.3** holds in every decimal type, famously fails in f64,
+  and holds in `i32f32` only by a rounding coincidence — 0.1 is not
+  representable there either, as `0.1 × 10 ≠ 1` shows.
+- **(1/3) × 3**: f64 returns exactly 1.0 (the multiply's error cancels the
+  divide's). `rust_decimal` gives 0.999…9 (28 digits) and `BigDecimal`
+  0.999…9 (100 digits) — honest inexactness. `fastnum` D128 returns
+  exactly 1 again: its 128-bit coefficient carries a guard digit past the
+  nominal 38, so the multiply rounds back up.
+- **30 periods of compound interest** agree with the `rust_decimal`
+  reference to ~1e-12 relative for every 50-bit-plus type; f16/bf16 land
+  within 15%/25% — usable as texture, not as money.
+
 ## License
 
 MIT
