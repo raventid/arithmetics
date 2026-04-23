@@ -159,6 +159,13 @@ Reading the numbers:
   so LLVM vectorizes it — something it may not do for float folds.
 - The `f16` rows equal `f32` on scalar ops because this CPU has hardware
   FP16 (see caveat below); `bf16` stays software and pays ~4×.
+
+> **f16 portability caveat.** The `half` crate uses hardware float16
+> instructions where the target has them (Apple Silicon does — hence the
+> f32-equal rows above) and falls back to software conversion through f32
+> elsewhere. On an x86-64 without AVX-512 FP16 expect the `f16` rows to
+> look like the `bf16` rows, several times slower than `f32`. The
+> precision results are portable; the f16 *speed* results are not.
 - `sum/f16` vs `sum/f16_f32acc` (3.02 vs 0.58) is the serial dependency
   chain through a 16-bit accumulator versus the widen-then-fold pattern —
   and per `tests/precision.rs`, the 16-bit accumulator also stalls at 256.
