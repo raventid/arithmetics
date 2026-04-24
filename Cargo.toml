@@ -1,10 +1,10 @@
 [package]
 name = "arithmetics"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 rust-version = "1.86"
 authors = ["raventid"]
-description = "Comprehensive comparison and benchmarking of Rust arithmetic libraries"
+description = "Microbenchmarks comparing Rust numeric types: floats, decimals, fixed-point, half-precision"
 license = "MIT"
 
 [dependencies]
