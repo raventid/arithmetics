@@ -159,6 +159,9 @@ Reading the numbers:
   so LLVM vectorizes it — something it may not do for float folds.
 - The `f16` rows equal `f32` on scalar ops because this CPU has hardware
   FP16 (see caveat below); `bf16` stays software and pays ~4×.
+- `sum/f16` vs `sum/f16_f32acc` (3.02 vs 0.58) is the serial dependency
+  chain through a 16-bit accumulator versus the widen-then-fold pattern —
+  and per `tests/precision.rs`, the 16-bit accumulator also stalls at 256.
 
 > **f16 portability caveat.** The `half` crate uses hardware float16
 > instructions where the target has them (Apple Silicon does — hence the
@@ -166,16 +169,13 @@ Reading the numbers:
 > elsewhere. On an x86-64 without AVX-512 FP16 expect the `f16` rows to
 > look like the `bf16` rows, several times slower than `f32`. The
 > precision results are portable; the f16 *speed* results are not.
-- `sum/f16` vs `sum/f16_f32acc` (3.02 vs 0.58) is the serial dependency
-  chain through a 16-bit accumulator versus the widen-then-fold pattern —
-  and per `tests/precision.rs`, the 16-bit accumulator also stalls at 256.
 
 ## Precision findings
 
 From `tests/precision.rs` (all asserted, not folklore):
 
 - **0.1 added 10 000 times**: exactly 1000 for all three decimal types.
-  f64 lands ~1.6e-8 off, f32 ~3e-2, `i32f32` ~2e-7 — and `f16` stops at
+  f64 lands ~1.6e-10 off, f32 ~0.1, `i32f32` ~2.3e-7 — and `f16` stops at
   **256**, because from there its spacing is 0.25 and adding 0.1 rounds to
   a no-op.
 - **0.1 + 0.2 == 0.3** holds in every decimal type, famously fails in f64,
