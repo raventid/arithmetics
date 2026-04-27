@@ -60,15 +60,69 @@ macro_rules! bench_all_types {
         let (sa, sb) = operands();
         let mut group = $c.benchmark_group($name);
         group.throughput(Throughput::Elements(N as u64));
-        bench_binop!(group, "f32", parse_all::<f32>(&sa), parse_all::<f32>(&sb), $op);
-        bench_binop!(group, "f64", parse_all::<f64>(&sa), parse_all::<f64>(&sb), $op);
-        bench_binop!(group, "f16", parse_all::<f16>(&sa), parse_all::<f16>(&sb), $op);
-        bench_binop!(group, "bf16", parse_all::<bf16>(&sa), parse_all::<bf16>(&sb), $op);
-        bench_binop!(group, "i32f32", parse_all::<I32F32>(&sa), parse_all::<I32F32>(&sb), $op);
-        bench_binop!(group, "i64f64", parse_all::<I64F64>(&sa), parse_all::<I64F64>(&sb), $op);
-        bench_binop!(group, "rust_decimal", parse_all::<Decimal>(&sa), parse_all::<Decimal>(&sb), $op);
-        bench_binop!(ref group, "bigdecimal", parse_all::<BigDecimal>(&sa), parse_all::<BigDecimal>(&sb), $op);
-        bench_binop!(group, "fastnum_d128", parse_all::<D128>(&sa), parse_all::<D128>(&sb), $op);
+        bench_binop!(
+            group,
+            "f32",
+            parse_all::<f32>(&sa),
+            parse_all::<f32>(&sb),
+            $op
+        );
+        bench_binop!(
+            group,
+            "f64",
+            parse_all::<f64>(&sa),
+            parse_all::<f64>(&sb),
+            $op
+        );
+        bench_binop!(
+            group,
+            "f16",
+            parse_all::<f16>(&sa),
+            parse_all::<f16>(&sb),
+            $op
+        );
+        bench_binop!(
+            group,
+            "bf16",
+            parse_all::<bf16>(&sa),
+            parse_all::<bf16>(&sb),
+            $op
+        );
+        bench_binop!(
+            group,
+            "i32f32",
+            parse_all::<I32F32>(&sa),
+            parse_all::<I32F32>(&sb),
+            $op
+        );
+        bench_binop!(
+            group,
+            "i64f64",
+            parse_all::<I64F64>(&sa),
+            parse_all::<I64F64>(&sb),
+            $op
+        );
+        bench_binop!(
+            group,
+            "rust_decimal",
+            parse_all::<Decimal>(&sa),
+            parse_all::<Decimal>(&sb),
+            $op
+        );
+        bench_binop!(
+            ref group,
+            "bigdecimal",
+            parse_all::<BigDecimal>(&sa),
+            parse_all::<BigDecimal>(&sb),
+            $op
+        );
+        bench_binop!(
+            group,
+            "fastnum_d128",
+            parse_all::<D128>(&sa),
+            parse_all::<D128>(&sb),
+            $op
+        );
         group.finish();
     }};
 }

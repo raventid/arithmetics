@@ -15,7 +15,7 @@ impl Lcg {
 
     /// Next pseudo-random value. Only the statistically stronger high 32
     /// bits of the state are returned.
-    pub fn next(&mut self) -> u64 {
+    pub fn next_u64(&mut self) -> u64 {
         self.0 = self
             .0
             .wrapping_mul(6364136223846793005)
@@ -48,8 +48,13 @@ pub fn decimal_strings(seed: u64, n: usize, dp: u32, lo_units: u64, hi_units: u6
     let mut rng = Lcg::new(seed);
     (0..n)
         .map(|_| {
-            let units = lo_units + rng.next() % span;
-            format!("{}.{:0width$}", units / scale, units % scale, width = dp as usize)
+            let units = lo_units + rng.next_u64() % span;
+            format!(
+                "{}.{:0width$}",
+                units / scale,
+                units % scale,
+                width = dp as usize
+            )
         })
         .collect()
 }

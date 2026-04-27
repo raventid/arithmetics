@@ -79,8 +79,18 @@ fn sum(c: &mut Criterion) {
     bench_sum!(group, "bf16", parse_all::<bf16>(&sa), bf16::ZERO);
     bench_sum!(group, "i32f32", parse_all::<I32F32>(&sa), I32F32::ZERO);
     bench_sum!(group, "i64f64", parse_all::<I64F64>(&sa), I64F64::ZERO);
-    bench_sum!(group, "rust_decimal", parse_all::<Decimal>(&sa), Decimal::ZERO);
-    bench_sum!(ref group, "bigdecimal", parse_all::<BigDecimal>(&sa), BigDecimal::zero());
+    bench_sum!(
+        group,
+        "rust_decimal",
+        parse_all::<Decimal>(&sa),
+        Decimal::ZERO
+    );
+    bench_sum!(
+        ref group,
+        "bigdecimal",
+        parse_all::<BigDecimal>(&sa),
+        BigDecimal::zero()
+    );
     bench_sum!(group, "fastnum_d128", parse_all::<D128>(&sa), D128::ZERO);
 
     // The pattern ML code actually uses: 16-bit storage, f32 accumulator.
@@ -89,11 +99,23 @@ fn sum(c: &mut Criterion) {
     // element magnitude.
     let f16s: Vec<f16> = parse_all(&sa);
     group.bench_function("f16_f32acc", |b| {
-        b.iter(|| black_box(black_box(&f16s).iter().fold(0.0f32, |acc, x| acc + x.to_f32())))
+        b.iter(|| {
+            black_box(
+                black_box(&f16s)
+                    .iter()
+                    .fold(0.0f32, |acc, x| acc + x.to_f32()),
+            )
+        })
     });
     let bf16s: Vec<bf16> = parse_all(&sa);
     group.bench_function("bf16_f32acc", |b| {
-        b.iter(|| black_box(black_box(&bf16s).iter().fold(0.0f32, |acc, x| acc + x.to_f32())))
+        b.iter(|| {
+            black_box(
+                black_box(&bf16s)
+                    .iter()
+                    .fold(0.0f32, |acc, x| acc + x.to_f32()),
+            )
+        })
     });
     group.finish();
 }
@@ -102,15 +124,69 @@ fn dot(c: &mut Criterion) {
     let (sa, sb) = operands();
     let mut group = c.benchmark_group("dot");
     group.throughput(Throughput::Elements(N as u64));
-    bench_dot!(group, "f32", parse_all::<f32>(&sa), parse_all::<f32>(&sb), 0.0f32);
-    bench_dot!(group, "f64", parse_all::<f64>(&sa), parse_all::<f64>(&sb), 0.0f64);
-    bench_dot!(group, "f16", parse_all::<f16>(&sa), parse_all::<f16>(&sb), f16::ZERO);
-    bench_dot!(group, "bf16", parse_all::<bf16>(&sa), parse_all::<bf16>(&sb), bf16::ZERO);
-    bench_dot!(group, "i32f32", parse_all::<I32F32>(&sa), parse_all::<I32F32>(&sb), I32F32::ZERO);
-    bench_dot!(group, "i64f64", parse_all::<I64F64>(&sa), parse_all::<I64F64>(&sb), I64F64::ZERO);
-    bench_dot!(group, "rust_decimal", parse_all::<Decimal>(&sa), parse_all::<Decimal>(&sb), Decimal::ZERO);
-    bench_dot!(ref group, "bigdecimal", parse_all::<BigDecimal>(&sa), parse_all::<BigDecimal>(&sb), BigDecimal::zero());
-    bench_dot!(group, "fastnum_d128", parse_all::<D128>(&sa), parse_all::<D128>(&sb), D128::ZERO);
+    bench_dot!(
+        group,
+        "f32",
+        parse_all::<f32>(&sa),
+        parse_all::<f32>(&sb),
+        0.0f32
+    );
+    bench_dot!(
+        group,
+        "f64",
+        parse_all::<f64>(&sa),
+        parse_all::<f64>(&sb),
+        0.0f64
+    );
+    bench_dot!(
+        group,
+        "f16",
+        parse_all::<f16>(&sa),
+        parse_all::<f16>(&sb),
+        f16::ZERO
+    );
+    bench_dot!(
+        group,
+        "bf16",
+        parse_all::<bf16>(&sa),
+        parse_all::<bf16>(&sb),
+        bf16::ZERO
+    );
+    bench_dot!(
+        group,
+        "i32f32",
+        parse_all::<I32F32>(&sa),
+        parse_all::<I32F32>(&sb),
+        I32F32::ZERO
+    );
+    bench_dot!(
+        group,
+        "i64f64",
+        parse_all::<I64F64>(&sa),
+        parse_all::<I64F64>(&sb),
+        I64F64::ZERO
+    );
+    bench_dot!(
+        group,
+        "rust_decimal",
+        parse_all::<Decimal>(&sa),
+        parse_all::<Decimal>(&sb),
+        Decimal::ZERO
+    );
+    bench_dot!(
+        ref group,
+        "bigdecimal",
+        parse_all::<BigDecimal>(&sa),
+        parse_all::<BigDecimal>(&sb),
+        BigDecimal::zero()
+    );
+    bench_dot!(
+        group,
+        "fastnum_d128",
+        parse_all::<D128>(&sa),
+        parse_all::<D128>(&sb),
+        D128::ZERO
+    );
     group.finish();
 }
 

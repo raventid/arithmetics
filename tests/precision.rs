@@ -18,21 +18,21 @@ fn accumulation_decimals_are_exact() {
     let step = Decimal::from_str("0.1").unwrap();
     let mut sum = Decimal::ZERO;
     for _ in 0..STEPS {
-        sum = sum + step;
+        sum += step;
     }
     assert_eq!(sum, Decimal::from(1000));
 
     let step = BigDecimal::from_str("0.1").unwrap();
     let mut sum = BigDecimal::from(0);
     for _ in 0..STEPS {
-        sum = sum + &step;
+        sum += &step;
     }
     assert_eq!(sum, BigDecimal::from(1000));
 
     let step: D128 = "0.1".parse().unwrap();
     let mut sum = D128::ZERO;
     for _ in 0..STEPS {
-        sum = sum + step;
+        sum += step;
     }
     assert_eq!(sum, "1000".parse::<D128>().unwrap());
 }
@@ -67,7 +67,7 @@ fn accumulation_i32f32_drifts_slightly() {
     let step = I32F32::from_str("0.1").unwrap();
     let mut sum = I32F32::ZERO;
     for _ in 0..STEPS {
-        sum = sum + step;
+        sum += step;
     }
     let err = (sum.to_num::<f64>() - 1000.0).abs();
     assert!(err > 0.0 && err < 1e-6, "i32f32 accumulated error: {err:e}");
@@ -81,7 +81,7 @@ fn accumulation_f16_stalls() {
     let step = f16::from_f32(0.1);
     let mut sum = f16::ZERO;
     for _ in 0..STEPS {
-        sum = sum + step;
+        sum += step;
     }
     assert_eq!(sum, f16::from_f32(256.0));
 }
@@ -135,14 +135,17 @@ fn one_third_round_trip_decimals() {
     let round = (Decimal::ONE / Decimal::from(3)) * Decimal::from(3);
     assert_ne!(round, Decimal::ONE);
     let err = Decimal::ONE - round;
-    assert!(err > Decimal::ZERO && err < Decimal::new(1, 27), "err = {err}");
+    assert!(
+        err > Decimal::ZERO && err < Decimal::new(1, 27),
+        "err = {err}"
+    );
 
     // BigDecimal: division computes 100 significant digits by default.
     let round = (BigDecimal::from(1) / BigDecimal::from(3)) * BigDecimal::from(3);
     assert_ne!(round, BigDecimal::from(1));
     let err = BigDecimal::from(1) - &round;
     assert!(
-        err > BigDecimal::from(0) && err < BigDecimal::from_str("1e-99").unwrap(),
+        err > 0 && err < BigDecimal::from_str("1e-99").unwrap(),
         "err = {err}"
     );
 
@@ -185,8 +188,16 @@ fn compound_interest_cross_agreement() {
     let rel = |x: f64| ((x - reference) / reference).abs();
     assert!(rel(compound!(f64)) < 1e-12);
     assert!(rel(compound!(f32) as f64) < 1e-3);
-    assert!(rel(compound!(f16).to_f64()) < 0.15, "f16: {}", compound!(f16));
-    assert!(rel(compound!(bf16).to_f64()) < 0.25, "bf16: {}", compound!(bf16));
+    assert!(
+        rel(compound!(f16).to_f64()) < 0.15,
+        "f16: {}",
+        compound!(f16)
+    );
+    assert!(
+        rel(compound!(bf16).to_f64()) < 0.25,
+        "bf16: {}",
+        compound!(bf16)
+    );
     assert!(rel(compound!(I32F32).to_num::<f64>()) < 1e-6);
     assert!(rel(compound!(I64F64).to_num::<f64>()) < 1e-12);
     assert!(rel(compound!(ref BigDecimal).to_f64().unwrap()) < 1e-12);

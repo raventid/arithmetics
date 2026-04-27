@@ -99,8 +99,12 @@ fn from_f64(c: &mut Criterion) {
     bench_conv!(group, "f16", vals, |x: &f64| f16::from_f64(*x));
     bench_conv!(group, "bf16", vals, |x: &f64| bf16::from_f64(*x));
     bench_conv!(group, "i32f32", vals, |x: &f64| I32F32::from_num(*x));
-    bench_conv!(group, "rust_decimal", vals, |x: &f64| Decimal::from_f64(*x).unwrap());
-    bench_conv!(group, "bigdecimal", vals, |x: &f64| BigDecimal::try_from(*x).unwrap());
+    bench_conv!(group, "rust_decimal", vals, |x: &f64| Decimal::from_f64(*x)
+        .unwrap());
+    bench_conv!(group, "bigdecimal", vals, |x: &f64| BigDecimal::try_from(
+        *x
+    )
+    .unwrap());
     bench_conv!(group, "fastnum_d128", vals, |x: &f64| D128::from_f64(*x));
     group.finish();
 }
@@ -110,17 +114,29 @@ fn to_f64(c: &mut Criterion) {
     let mut group = c.benchmark_group("to_f64");
     group.throughput(Throughput::Elements(N as u64));
     bench_conv!(group, "f16", parse_all::<f16>(&strs), |x: &f16| x.to_f64());
-    bench_conv!(group, "bf16", parse_all::<bf16>(&strs), |x: &bf16| x.to_f64());
+    bench_conv!(group, "bf16", parse_all::<bf16>(&strs), |x: &bf16| x
+        .to_f64());
     bench_conv!(group, "i32f32", parse_all::<I32F32>(&strs), |x: &I32F32| {
         x.to_num::<f64>()
     });
-    bench_conv!(group, "rust_decimal", parse_all::<Decimal>(&strs), |x: &Decimal| {
-        x.to_f64().unwrap()
-    });
-    bench_conv!(group, "bigdecimal", parse_all::<BigDecimal>(&strs), |x: &BigDecimal| {
-        x.to_f64().unwrap()
-    });
-    bench_conv!(group, "fastnum_d128", parse_all::<D128>(&strs), |x: &D128| x.to_f64());
+    bench_conv!(
+        group,
+        "rust_decimal",
+        parse_all::<Decimal>(&strs),
+        |x: &Decimal| { x.to_f64().unwrap() }
+    );
+    bench_conv!(
+        group,
+        "bigdecimal",
+        parse_all::<BigDecimal>(&strs),
+        |x: &BigDecimal| { x.to_f64().unwrap() }
+    );
+    bench_conv!(
+        group,
+        "fastnum_d128",
+        parse_all::<D128>(&strs),
+        |x: &D128| x.to_f64()
+    );
     group.finish();
 }
 

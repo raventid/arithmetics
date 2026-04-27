@@ -62,15 +62,60 @@ fn compound_interest(c: &mut Criterion) {
     const R: &str = "0.05";
     let mut group = c.benchmark_group("compound_interest");
     group.sample_size(50);
-    bench_compound!(group, "f32", P.parse::<f32>().unwrap(), R.parse::<f32>().unwrap());
-    bench_compound!(group, "f64", P.parse::<f64>().unwrap(), R.parse::<f64>().unwrap());
-    bench_compound!(group, "f16", P.parse::<f16>().unwrap(), R.parse::<f16>().unwrap());
-    bench_compound!(group, "bf16", P.parse::<bf16>().unwrap(), R.parse::<bf16>().unwrap());
-    bench_compound!(group, "i32f32", P.parse::<I32F32>().unwrap(), R.parse::<I32F32>().unwrap());
-    bench_compound!(group, "i64f64", P.parse::<I64F64>().unwrap(), R.parse::<I64F64>().unwrap());
-    bench_compound!(group, "rust_decimal", P.parse::<Decimal>().unwrap(), R.parse::<Decimal>().unwrap());
-    bench_compound!(ref group, "bigdecimal", P.parse::<BigDecimal>().unwrap(), R.parse::<BigDecimal>().unwrap());
-    bench_compound!(group, "fastnum_d128", P.parse::<D128>().unwrap(), R.parse::<D128>().unwrap());
+    bench_compound!(
+        group,
+        "f32",
+        P.parse::<f32>().unwrap(),
+        R.parse::<f32>().unwrap()
+    );
+    bench_compound!(
+        group,
+        "f64",
+        P.parse::<f64>().unwrap(),
+        R.parse::<f64>().unwrap()
+    );
+    bench_compound!(
+        group,
+        "f16",
+        P.parse::<f16>().unwrap(),
+        R.parse::<f16>().unwrap()
+    );
+    bench_compound!(
+        group,
+        "bf16",
+        P.parse::<bf16>().unwrap(),
+        R.parse::<bf16>().unwrap()
+    );
+    bench_compound!(
+        group,
+        "i32f32",
+        P.parse::<I32F32>().unwrap(),
+        R.parse::<I32F32>().unwrap()
+    );
+    bench_compound!(
+        group,
+        "i64f64",
+        P.parse::<I64F64>().unwrap(),
+        R.parse::<I64F64>().unwrap()
+    );
+    bench_compound!(
+        group,
+        "rust_decimal",
+        P.parse::<Decimal>().unwrap(),
+        R.parse::<Decimal>().unwrap()
+    );
+    bench_compound!(
+        ref group,
+        "bigdecimal",
+        P.parse::<BigDecimal>().unwrap(),
+        R.parse::<BigDecimal>().unwrap()
+    );
+    bench_compound!(
+        group,
+        "fastnum_d128",
+        P.parse::<D128>().unwrap(),
+        R.parse::<D128>().unwrap()
+    );
     group.finish();
 }
 
@@ -84,7 +129,7 @@ macro_rules! bench_invoice {
             b.iter(|| {
                 let mut total = $zero;
                 for (q, p) in black_box(qtys).iter().zip(black_box(prices).iter()) {
-                    total = total + *q * *p;
+                    total += *q * *p;
                 }
                 black_box(total / count)
             })
@@ -96,7 +141,7 @@ macro_rules! bench_invoice {
             b.iter(|| {
                 let mut total = $zero;
                 for (q, p) in black_box(qtys).iter().zip(black_box(prices).iter()) {
-                    total = total + q * p;
+                    total += q * p;
                 }
                 black_box(&total / count)
             })
@@ -106,7 +151,9 @@ macro_rules! bench_invoice {
 
 fn invoice_total(c: &mut Criterion) {
     let mut rng = Lcg::new(0x1CE);
-    let qty_strings: Vec<String> = (0..ITEMS).map(|_| (1 + rng.next() % 5).to_string()).collect();
+    let qty_strings: Vec<String> = (0..ITEMS)
+        .map(|_| (1 + rng.next_u64() % 5).to_string())
+        .collect();
     let price_strings = decimal_strings(0xF00D, ITEMS, 2, 100, 2_000);
     let count = ITEMS.to_string();
 
@@ -162,7 +209,7 @@ macro_rules! bench_fir {
                 for i in 0..(SAMPLES - TAPS) {
                     let mut acc = $zero;
                     for (k, t) in taps.iter().enumerate() {
-                        acc = acc + signal[i + k] * *t;
+                        acc += signal[i + k] * *t;
                     }
                     black_box(acc);
                 }
@@ -178,7 +225,7 @@ macro_rules! bench_fir {
                 for i in 0..(SAMPLES - TAPS) {
                     let mut acc = $zero;
                     for (k, t) in taps.iter().enumerate() {
-                        acc = acc + &signal[i + k] * t;
+                        acc += &signal[i + k] * t;
                     }
                     black_box(acc);
                 }
